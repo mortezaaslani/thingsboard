@@ -363,7 +363,7 @@
                                         <outputDirectory>${project.build.directory}/bin/install</outputDirectory>
                                         <resources>
                                             <resource>
-                                                <directory>${main.dir}/packaging/${pkg.type}/scripts/install</directory>
+                                                <directory>${main.dir}/packaging/$f{pkg.type}/scripts/install</directory>
                                                 <includes>
                                                     <include>**/*.sh</include>
                                                     <include>**/*.xml</include>

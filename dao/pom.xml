@@ -34,6 +34,13 @@
         <main.dir>${basedir}/..</main.dir>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.thingsboard.common</groupId>
@@ -252,7 +259,13 @@
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.kavenegar</groupId>
+            <artifactId>kavenegar-java</artifactId>
+            <version>v2.0.3</version>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

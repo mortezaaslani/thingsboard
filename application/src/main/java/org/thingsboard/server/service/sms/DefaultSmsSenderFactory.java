@@ -23,6 +23,7 @@ import org.thingsboard.server.common.data.sms.config.SmppSmsProviderConfiguratio
 import org.thingsboard.server.common.data.sms.config.SmsProviderConfiguration;
 import org.thingsboard.server.common.data.sms.config.TwilioSmsProviderConfiguration;
 import org.thingsboard.server.service.sms.aws.AwsSmsSender;
+import org.thingsboard.server.service.sms.ghasedak.GhasedakSmsSender;
 import org.thingsboard.server.service.sms.smpp.SmppSmsSender;
 import org.thingsboard.server.service.sms.twilio.TwilioSmsSender;
 

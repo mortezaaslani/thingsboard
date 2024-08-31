@@ -213,12 +213,14 @@ public class UserController extends BaseController {
             @Parameter(description = "A JSON value representing the User.", required = true)
             @RequestBody User user,
             @Parameter(description = "Send activation email (or use activation link)" , schema = @Schema(defaultValue = "true"))
-            @RequestParam(required = false, defaultValue = "true") boolean sendActivationMail, HttpServletRequest request) throws ThingsboardException {
+            @RequestParam(required = false, defaultValue = "true") boolean sendActivationMail,
+            @RequestParam(required = false, defaultValue = "false") boolean sendActivationSms, // پارامتر جدید
+             HttpServletRequest request) throws ThingsboardException {
         if (!Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
             user.setTenantId(getCurrentUser().getTenantId());
         }
         checkEntity(user.getId(), user, Resource.USER);
-        return tbUserService.save(getTenantId(), getCurrentUser().getCustomerId(), user, sendActivationMail, request, getCurrentUser());
+        return tbUserService.save(getTenantId(), getCurrentUser().getCustomerId(), user, sendActivationMail, sendActivationSms, request, getCurrentUser());
     }
 
     @ApiOperation(value = "Send or re-send the activation email",

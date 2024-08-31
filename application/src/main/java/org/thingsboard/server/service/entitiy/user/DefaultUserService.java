@@ -33,6 +33,7 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.thingsboard.server.service.sms.ghasedak.GhasedakSmsSender;
 
 import static org.thingsboard.server.controller.UserController.ACTIVATE_URL_PATTERN;
 
@@ -47,11 +48,12 @@ public class DefaultUserService extends AbstractTbEntityService implements TbUse
     private final SystemSecurityService systemSecurityService;
 
     @Override
-    public User save(TenantId tenantId, CustomerId customerId, User tbUser, boolean sendActivationMail,
+    public User save(TenantId tenantId, CustomerId customerId, User tbUser, boolean sendActivationMail, boolean sendActivationSms,
                      HttpServletRequest request, User user) throws ThingsboardException {
         ActionType actionType = tbUser.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
         try {
             boolean sendEmail = tbUser.getId() == null && sendActivationMail;
+            boolean sendSms = tbUser.getId() == null && sendActivationSms;
             User savedUser = checkNotNull(userService.saveUser(tenantId, tbUser));
             if (sendEmail) {
                 UserCredentials userCredentials = userService.findUserCredentialsByUserId(tenantId, savedUser.getId());
@@ -63,6 +65,21 @@ public class DefaultUserService extends AbstractTbEntityService implements TbUse
                     mailService.sendActivationEmail(activateUrl, email);
                 } catch (ThingsboardException e) {
                     userService.deleteUser(tenantId, savedUser);
+                    throw e;
+                }
+            }
+            if (sendSms) {
+                UserCredentials userCredentials = userService.findUserCredentialsByUserId(tenantId, savedUser.getId());
+                String baseUrl = systemSecurityService.getBaseUrl(tenantId, customerId, request);
+                String activateUrl = String.format(ACTIVATE_URL_PATTERN, baseUrl,
+                        userCredentials.getActivateToken());
+                String phone = savedUser.getPhone();
+                try {
+                    GhasedakSmsSender smsSender = new GhasedakSmsSender();
+                    smsSender.sendSms(phone, activateUrl);
+                } catch (Exception e) {
+                    userService.deleteUser(tenantId, savedUser);
+                    log.info("Unable to send activation SMS [{}]", e.getMessage());
                     throw e;
                 }
             }

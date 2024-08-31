@@ -58,6 +58,7 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.model.UserPrincipal;
 import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
+import org.thingsboard.server.service.sms.ghasedak.GhasedakSmsSender;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -228,6 +229,7 @@ public class AuthController extends BaseController {
             @Parameter(description = "Activate user request.")
             @RequestBody ActivateUserRequest activateRequest,
             @RequestParam(required = false, defaultValue = "true") boolean sendActivationMail,
+            @RequestParam(required = false, defaultValue = "false") boolean sendActivationSms, // پارامتر جدید
             HttpServletRequest request) throws ThingsboardException {
         String activateToken = activateRequest.getActivateToken();
         String password = activateRequest.getPassword();
@@ -241,12 +243,23 @@ public class AuthController extends BaseController {
         String baseUrl = systemSecurityService.getBaseUrl(user.getTenantId(), user.getCustomerId(), request);
         String loginUrl = String.format("%s/login", baseUrl);
         String email = user.getEmail();
+        String phone = user.getPhone();
 
         if (sendActivationMail) {
             try {
                 mailService.sendAccountActivatedEmail(loginUrl, email);
             } catch (Exception e) {
                 log.info("Unable to send account activation email [{}]", e.getMessage());
+            }
+        }
+
+        if (sendActivationSms && phone != null) {
+            String smsMessage = String.format("لینک فعال سازی: %s", loginUrl);
+            try {
+                GhasedakSmsSender smsSender = new GhasedakSmsSender();
+                smsSender.sendSms(phone, smsMessage);
+            } catch (Exception e) {
+                log.info("Unable to send activation SMS [{}]", e.getMessage());
             }
         }
 
